@@ -3,10 +3,10 @@
 layout: home
 
 hero:
-  name: "长沙理工人工智能学院智能网络"
-  # text: "主打一个便民服务"
+  name: "长理人工智能学院"
+  # text: "博学、力行、守正、拓新"
   image: csust.png
-  # tagline: 欢迎使用
+  tagline: 博学 力行 守正 拓新
   actions:
     - theme: brand
       text: 新生必读

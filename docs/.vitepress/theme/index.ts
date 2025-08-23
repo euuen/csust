@@ -1,19 +1,21 @@
 // https://vitepress.dev/guide/custom-theme
 import { h, toRefs } from 'vue'
-import type { Theme} from 'vitepress'
+import type { Theme } from 'vitepress'
 import { useData, useRoute } from 'vitepress';
 import DefaultTheme from 'vitepress/theme'
 import './style.css'
 import giscusTalk from 'vitepress-plugin-comment-with-giscus'
 import test from "./test.vue"
+import Layout from './Layout.vue';
 
 export default {
   extends: DefaultTheme,
-  Layout: () => {
-    return h(DefaultTheme.Layout, null, {
-      // https://vitepress.dev/guide/extending-default-theme#layout-slots
-    })
-  },
+  Layout: Layout,
+  // Layout: () => {
+  //   return h(DefaultTheme.Layout, null, {
+  //     // https://vitepress.dev/guide/extending-default-theme#layout-slots
+  //   })
+  // },
   enhanceApp({ app, router, siteData }) {
     app.component('test', test)
   },

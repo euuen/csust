@@ -3,12 +3,16 @@ import tailwindcss from "@tailwindcss/vite"
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "长沙理工人工智能学院智能网络",
+  title: "长理人工智能学院",
   // description: "主打一个便民服务",
   base: "/csust",
   head: [
-    ['link', { rel: 'icon', href: '/csust.png' }],
+    ['link', { rel: 'icon', href: '/csust/csust.png' }],
   ],
+  markdown:{
+    lineNumbers: true,
+
+  },
   themeConfig: {
     logo: "/csust.png",
     // https://vitepress.dev/reference/default-theme-config

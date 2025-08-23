@@ -138,3 +138,25 @@
   --docsearch-primary-color: var(--vp-c-brand-1) !important;
 }
 
+#VPContent .vp-doc > div {
+  animation: rises 1s, looming 0.6s;
+}
+
+@keyframes rises {
+  0% {
+    transform: translateY(50px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes looming {
+  0% {
+  opacity: 0;
+  }
+  100% {
+  opacity: 1;
+  } 
+}
+
