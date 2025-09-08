@@ -34,7 +34,7 @@ export default defineConfig({
           // { text: 'Markdown Examples', link: '/markdown-examples' },
           // { text: 'Runtime API Examples', link: '/api-examples' }
           { text:"反驳功利心女生", link:"/nv" },
-          { text:"更好的批评", link: "/betterpp" },
+          { text:"更好的批评", link: "/betterpp.md" },
           { text:"学习的本质", link:"/study/essential" },
           { text:"学习如何学习", link:'/study/lrtostudy' },
           { text: "多人听歌", link:'/sharedmusic' },
