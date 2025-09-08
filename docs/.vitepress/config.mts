@@ -23,10 +23,18 @@ export default defineConfig({
 
     sidebar: [
       {
+        text: '初来乍到',
+        items: [
+          { text: "新生必读", link:'/mustread' }
+        ]
+      },
+      {
         text: '长沙理工',
         items: [
           // { text: 'Markdown Examples', link: '/markdown-examples' },
           // { text: 'Runtime API Examples', link: '/api-examples' }
+          { text:"学习的本质", link:"/study/essential" },
+          { text:"学习如何学习", link:'/study/lrtostudy' },
           { text: "多人听歌", link:'/sharedmusic' },
           { text: "关于本站", link:'/about'}
         ]
