@@ -25,4 +25,9 @@ features:
   - icon: 💎
     title: 自由开发
     details: 你可以给站长提供意见然后将你的想法运用到网站上
+
+sidebar: false
+outline: false
 ---
+
+<hs></hs>
