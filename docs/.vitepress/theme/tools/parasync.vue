@@ -1,34 +1,96 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, watch } from "vue";
 
 const paraList = ref(0)
 
-const paras = ref(
-    [
-        {
-            id: 0,
-            name: "kp",
-            progress: 0,
-            start: 0,
-            end: 300,
-        },
-        {
-            id: 1,
-            name: "ki",
-            progress: 0,
-            start: 0,
-            end: 300,
-        },
-        {
-            id: 2,
-            name: "kd",
-            progress: 0,
-            start: 0,
-            end: 300,
-        },
-    ]
-);
+const paras = ref();
+paras.value = [
+    { id: 0, name: "kp", progress: 0, start: 0, end: 300 },
+    { id: 1, name: "ki", progress: 0, start: 0, end: 300 },
+    { id: 2, name: "kd", progress: 0, start: 0, end: 300 }
+];
 const idNum = ref(3);
+
+// localStorage 键名
+const STORAGE_KEY = 'pid_controller_data'
+
+// 保存数据到 localStorage
+const saveToLocalStorage = () => {
+  try {
+    const dataToSave = {
+      paras: paras.value,
+      idNum: idNum.value,
+      lastSaved: new Date().toISOString()
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
+    console.log('数据已保存到 localStorage')
+  } catch (error) {
+    console.error('保存数据失败:', error)
+  }
+}
+
+// 从 localStorage 加载数据
+const loadFromLocalStorage = () => {
+  try {
+    const savedData = localStorage.getItem(STORAGE_KEY)
+    if (savedData) {
+      const parsedData = JSON.parse(savedData)
+      
+      // 验证数据格式
+      if (parsedData.paras && Array.isArray(parsedData.paras)) {
+        paras.value = parsedData.paras
+        idNum.value = parsedData.idNum || 3
+        
+        console.log('数据已从 localStorage 加载')
+        return true
+      }
+    }
+  } catch (error) {
+    console.error('加载数据失败:', error)
+  }
+  
+  // 如果没有数据或加载失败，使用默认值
+  console.log('使用默认数据')
+  return false
+}
+
+// 清除 localStorage 数据
+const clearLocalStorage = () => {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+    console.log('localStorage 数据已清除')
+    
+    // 重置为默认值
+    paras.value = [
+      { id: 0, name: "kp", progress: 0, start: 0, end: 300 },
+      { id: 1, name: "ki", progress: 0, start: 0, end: 300 },
+      { id: 2, name: "kd", progress: 0, start: 0, end: 300 }
+    ]
+    idNum.value = 3
+  } catch (error) {
+    console.error('清除数据失败:', error)
+  }
+}
+
+// 自动保存功能（可选）
+const setupAutoSave = () => {
+  // 监听 paras 变化，自动保存（防抖处理）
+  let saveTimeout
+  watch(paras, (newValue) => {
+    clearTimeout(saveTimeout)
+    saveTimeout = setTimeout(saveToLocalStorage, 1000) // 1秒后自动保存
+  }, { deep: true })
+  
+  // 监听 idNum 变化
+  watch(idNum, () => {
+    clearTimeout(saveTimeout)
+    saveTimeout = setTimeout(saveToLocalStorage, 1000)
+  })
+  
+  // 页面关闭前保存
+  window.addEventListener('beforeunload', saveToLocalStorage)
+}
+
 
 async function addNewPara() {
     paras.value.push({
@@ -47,6 +109,11 @@ async function deletePara(id) {
         paras.value.splice(index, 1)
     }
 }
+
+onMounted(() => {
+    loadFromLocalStorage();
+    setupAutoSave();
+});
 
 </script>
 
