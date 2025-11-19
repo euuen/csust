@@ -1,8 +1,9 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 
-const paraList = ref(0)
+const STORAGE_KEY = 'pid_controller_data'
 
+const paraList = ref(0)
 const paras = ref();
 paras.value = [
     { id: 0, name: "kp", progress: 0, start: 0, end: 300 },
@@ -10,11 +11,17 @@ paras.value = [
     { id: 2, name: "kd", progress: 0, start: 0, end: 300 }
 ];
 const idNum = ref(3);
+const BT24_SERVICE_UUID = 0xffe0; // 注意：Web Bluetooth API通常使用短UUID格式
+const BT24_TX_CHARACTERISTIC_UUID = 0xffe1; // 假设用于接收模块数据（通知）
+const BT24_RX_CHARACTERISTIC_UUID = 0xffe2; // 假设用于向模块发送数据（写）
 
-// localStorage 键名
-const STORAGE_KEY = 'pid_controller_data'
+let bt24Device = null;
+let bt24Server = null;
+let bt24Service = null;
+let txCharacteristic = null; // 用于接收数据（通知）
+let rxCharacteristic = null; // 用于发送数据（写）
+const isBLEConnected = ref(false);
 
-// 保存数据到 localStorage
 const saveToLocalStorage = () => {
   try {
     const dataToSave = {
@@ -29,7 +36,6 @@ const saveToLocalStorage = () => {
   }
 }
 
-// 从 localStorage 加载数据
 const loadFromLocalStorage = () => {
   try {
     const savedData = localStorage.getItem(STORAGE_KEY)
@@ -54,7 +60,6 @@ const loadFromLocalStorage = () => {
   return false
 }
 
-// 清除 localStorage 数据
 const clearLocalStorage = () => {
   try {
     localStorage.removeItem(STORAGE_KEY)
@@ -72,25 +77,53 @@ const clearLocalStorage = () => {
   }
 }
 
-// 自动保存功能（可选）
 const setupAutoSave = () => {
   // 监听 paras 变化，自动保存（防抖处理）
-  let saveTimeout
-  watch(paras, (newValue) => {
-    clearTimeout(saveTimeout)
-    saveTimeout = setTimeout(saveToLocalStorage, 1000) // 1秒后自动保存
-  }, { deep: true })
-  
-  // 监听 idNum 变化
-  watch(idNum, () => {
-    clearTimeout(saveTimeout)
-    saveTimeout = setTimeout(saveToLocalStorage, 1000)
-  })
-  
-  // 页面关闭前保存
-  window.addEventListener('beforeunload', saveToLocalStorage)
+    let saveTimeout
+    watch(paras, (newValue) => {
+        clearTimeout(saveTimeout)
+        saveTimeout = setTimeout(saveToLocalStorage, 1000); // 1秒后自动保存
+    }, { deep: true });
+
+    // 监听 idNum 变化
+    watch(idNum, () => {
+        clearTimeout(saveTimeout)
+        saveTimeout = setTimeout(saveToLocalStorage, 1000);
+    });
+
+    // 页面关闭前保存
+    window.addEventListener('beforeunload', saveToLocalStorage);
 }
 
+async function sendToMCU() {
+    if (rxCharacteristic === null) return;
+    let floatArray = [];
+    paras.value.forEach(para => {
+        floatArray.push(para.progress / 10000 * (para.end - para.start) + para.start);
+    });
+
+    // 1. 直接通过浮点数数组创建Float32Array视图
+    const float32View = new Float32Array(floatArray);
+    rxCharacteristic.writeValue(float32View.buffer);
+}
+
+async function setupAutoSend() {
+    // 监听 paras 变化，自动保存（防抖处理）
+    let saveTimeout
+    watch(paras, (newValue) => {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(sendToMCU, 100); // 1秒后自动保存
+    }, { deep: true })
+
+    // 监听 idNum 变化
+    watch(idNum, () => {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(sendToMCU, 100);
+    });
+
+    // 页面关闭前保存
+    window.addEventListener('beforeunload', sendToMCU);
+}
 
 async function addNewPara() {
     paras.value.push({
@@ -110,9 +143,49 @@ async function deletePara(id) {
     }
 }
 
+async function getDevice(){
+    bt24Device = await navigator.bluetooth.requestDevice({
+        filters: [{
+            services: [BT24_SERVICE_UUID] // 只显示提供此特定服务的设备
+        }],
+        optionalServices: [BT24_SERVICE_UUID]
+    });
+
+    bt24Server = await bt24Device.gatt.connect();
+    bt24Service = await bt24Server.getPrimaryService(BT24_SERVICE_UUID);
+
+    rxCharacteristic = await bt24Service.getCharacteristic(BT24_RX_CHARACTERISTIC_UUID);
+    txCharacteristic = await bt24Service.getCharacteristic(BT24_TX_CHARACTERISTIC_UUID);
+}
+
+async function connectToBLE() {
+    await getDevice();
+    if (bt24Device !== null){
+        isBLEConnected.value = true
+    }else {
+        isBLEConnected.value = false
+    }
+    
+}
+
+async function disconnectToBLE() {
+    if (bt24Device && bt24Device.gatt.connected) {
+        await bt24Device.gatt.disconnect();
+    }
+    
+    bt24Device = null;
+    bt24Server = null;
+    bt24Service = null;
+    rxCharacteristic = null;
+    txCharacteristic = null;
+
+    isBLEConnected.value = false;
+}
+
 onMounted(() => {
     loadFromLocalStorage();
     setupAutoSave();
+    setupAutoSend();
 });
 
 </script>
@@ -121,8 +194,20 @@ onMounted(() => {
     <div>
         <div class="flex-col mt-20" style="width: 100%;">
             <div>
-                <div class="mb-6" style="font-size: 2rem;">
-                    <span style="color: blue;">蓝牙</span>连接状态：<span style="color: red;">未连接</span>
+                <div class="blepanel">
+                    <span style="font-size: 2rem;">蓝牙连接面板（目前只支持BT24蓝牙）</span>
+                    <div style="padding: 15px;margin-top: 25px;justify-content: space-between;">
+                        <span style="font-size: 1rem;">连接状态</span>
+
+                        <span v-if="isBLEConnected" style="font-size: 2rem;color: green;">已连接</span>
+                        <span v-else style="font-size: 2rem;color: red;">未连接</span>
+                    </div>
+                    <div v-if="isBLEConnected" style="justify-content: center;">
+                        <button @click="disconnectToBLE" style="background-color: red;">断开连接</button>
+                    </div>
+                    <div v-else style="justify-content: center;">
+                        <button @click="connectToBLE">连接</button>
+                    </div>
                 </div>
             </div>
 
@@ -168,8 +253,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-@import "tailwindcss";
-
 * {
     color: #f7f7f7;
 }
@@ -198,6 +281,17 @@ button:hover {
 
 button:active {
     transform: translateY(0);
+}
+
+.blepanel {
+    width: 100%;
+    margin-top: 24px;
+    flex-direction: column;
+    min-width: 250px;
+    background: #171717;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .para-list {

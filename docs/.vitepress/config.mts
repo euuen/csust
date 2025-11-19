@@ -30,24 +30,24 @@ export default defineConfig({
         ]
       },
       {
-        text: '长沙理工',
-        items: [
-          // { text: 'Markdown Examples', link: '/markdown-examples' },
-          // { text: 'Runtime API Examples', link: '/api-examples' }
-          { text:"反驳功利心女生", link:"/nv" },
-          { text:"更好的批评", link: "/betterpp.md" },
-          { text:"学习的本质", link:"/study/essential" },
-          { text:"学习如何学习", link:'/study/lrtostudy' },
-          { text: "多人听歌", link:'/sharedmusic' },
-          { text: "关于本站", link:'/about'}
-        ]
-      },
-      {
         text: '工具',
         items : [
           { text:"蓝牙参数调试助手", link:"/tools/parasync.md" },
         ]
-      }
+      },
+      {
+        text: '长沙理工',
+        items: [
+          // { text: 'Markdown Examples', link: '/markdown-examples' },
+          // { text: 'Runtime API Examples', link: '/api-examples' }
+          { text: "反驳功利心女生", link:"/nv" },
+          { text: "更好的批评", link: "/betterpp.md" },
+          { text: "学习的本质", link:"/study/essential" },
+          { text: "学习如何学习", link:'/study/lrtostudy' },
+          { text: "多人听歌", link:'/sharedmusic' },
+          { text: "关于本站", link:'/about'}
+        ]
+      },
     ],
 
     socialLinks: [
