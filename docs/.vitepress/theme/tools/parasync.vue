@@ -162,6 +162,9 @@ async function connectToBLE() {
     await getDevice();
     if (bt24Device !== null){
         isBLEConnected.value = true
+        bt24Device.addEventListener("gattserverdisconnected", ()=>{
+            disconnectToBLE();
+        })
     }else {
         isBLEConnected.value = false
     }
@@ -195,7 +198,7 @@ onMounted(() => {
         <div class="flex-col mt-20" style="width: 100%;">
             <div>
                 <div class="blepanel">
-                    <span style="font-size: 2rem;">蓝牙连接面板（目前只支持BT24蓝牙）</span>
+                    <span style="font-size: 2rem;">蓝牙</span>
                     <div style="padding: 15px;margin-top: 25px;justify-content: space-between;">
                         <span style="font-size: 1rem;">连接状态</span>
 
