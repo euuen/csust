@@ -10,6 +10,7 @@ import Layout from './Layout.vue';
 
 import test from "./test.vue"
 import hs from './hs.vue';
+import parasync from './tools/parasync.vue';
 
 export default {
   extends: DefaultTheme,
@@ -20,8 +21,9 @@ export default {
   //   })
   // },
   enhanceApp({ app, router, siteData }) {
-    app.component('test', test)
-    app.component('hs', hs)
+    app.component('test', test);
+    app.component('hs', hs);
+    app.component('parasync', parasync);
   },
   setup() {
     const { frontmatter } = toRefs(useData());

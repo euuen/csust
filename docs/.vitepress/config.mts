@@ -17,6 +17,7 @@ export default defineConfig({
     logo: "/csust.png",
     // https://vitepress.dev/reference/default-theme-config
     nav: [
+      { text:"蓝牙参数调试助手", link:"/tools/parasync.md" },
       // { text: 'Home', link: '/' },
       // { text: 'Examples', link: '/markdown-examples' }
     ],
@@ -39,6 +40,12 @@ export default defineConfig({
           { text:"学习如何学习", link:'/study/lrtostudy' },
           { text: "多人听歌", link:'/sharedmusic' },
           { text: "关于本站", link:'/about'}
+        ]
+      },
+      {
+        text: '工具',
+        items : [
+          { text:"蓝牙参数调试助手", link:"/tools/parasync.md" },
         ]
       }
     ],
